@@ -59,10 +59,17 @@ extension Storage {
     }
 }
 
+// MARK: - Codable
+
+private struct CodableWrapper<T: UserDefaultsCompatible & Codable>: Codable {
+    let value: T
+}
+
 extension UserDefaultsCompatible where Self: Codable {
 
     public func store(key: String, userDefaults: UserDefaults) {
-        guard let data = try? JSONEncoder().encode(self) else {
+        let wrapper = CodableWrapper(value: self)
+        guard let data = try? JSONEncoder().encode(wrapper) else {
             fatalError("Failed to encode to JSON.")
         }
         userDefaults.setValue(data, forKey: key)
@@ -71,6 +78,9 @@ extension UserDefaultsCompatible where Self: Codable {
     public static func fetch(key: String, userDefaults: UserDefaults) -> Self? {
         guard let data = userDefaults.data(forKey: key) else {
             return nil
+        }
+        if let wrapper = try? JSONDecoder().decode(CodableWrapper<Self>.self, from: data) {
+            return wrapper.value
         }
         let object = try? JSONDecoder().decode(Self.self, from: data)
         return object
