@@ -13,7 +13,7 @@ struct CodableObject: UserDefaultsCompatible, Codable, Equatable {
 private final class TestObject {
 
     enum Key: String, CaseIterable {
-        case string, int, double, float, bool, codable, optional
+        case string, int, double, float, bool, codable, optional, optionalDate
     }
 
     @Storage(key: Key.string.rawValue, defaultValue: "default", userDefaults: userDefaults) var string: String
@@ -23,6 +23,7 @@ private final class TestObject {
     @Storage(key: Key.bool.rawValue, defaultValue: false, userDefaults: userDefaults) var bool: Bool
     @Storage(key: Key.codable.rawValue, defaultValue: CodableObject.defaultValue, userDefaults: userDefaults) var codable: CodableObject
     @Storage(key: Key.optional.rawValue, userDefaults: userDefaults) var optional: String?
+    @Storage(key: Key.optionalDate.rawValue, userDefaults: userDefaults) var optionalDate: Date?
 }
 
 final class UserDefaultsTest: XCTestCase {
@@ -45,6 +46,7 @@ final class UserDefaultsTest: XCTestCase {
         changeTest(\TestObject.bool, defaultValue: false, changeValue: true)
         changeTest(\TestObject.codable, defaultValue: CodableObject.defaultValue, changeValue: CodableObject(string: "change", int: 100))
         changeTest(\TestObject.optional, defaultValue: nil, changeValue: "Change")
+        changeTest(\TestObject.optionalDate, defaultValue: nil, changeValue: Date())
     }
 
     private func changeTest<Type: Equatable>(_ keyPath: WritableKeyPath<TestObject, Type>, defaultValue: Type, changeValue: Type) {
@@ -55,3 +57,5 @@ final class UserDefaultsTest: XCTestCase {
         XCTAssertEqual(object[keyPath: keyPath], changeValue)
     }
 }
+
+extension Date: UserDefaultsCompatible {}
