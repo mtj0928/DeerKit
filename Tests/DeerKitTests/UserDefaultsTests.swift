@@ -13,7 +13,7 @@ struct CodableObject: UserDefaultsCompatible, Codable, Equatable {
 private final class TestObject {
 
     enum Key: String, CaseIterable {
-        case string, int, double, float, bool, codable, optional, optionalDate
+        case string, int, double, float, bool, codable, optional, optionalDate, array
     }
 
     @Storage(key: Key.string.rawValue, defaultValue: "default", userDefaults: userDefaults) var string: String
@@ -24,6 +24,7 @@ private final class TestObject {
     @Storage(key: Key.codable.rawValue, defaultValue: CodableObject.defaultValue, userDefaults: userDefaults) var codable: CodableObject
     @Storage(key: Key.optional.rawValue, userDefaults: userDefaults) var optional: String?
     @Storage(key: Key.optionalDate.rawValue, userDefaults: userDefaults) var optionalDate: Date?
+    @Storage(key: Key.array.rawValue, defaultValue: [], userDefaults: userDefaults) var array: [CodableObject]
 }
 
 final class UserDefaultsTest: XCTestCase {
@@ -44,9 +45,14 @@ final class UserDefaultsTest: XCTestCase {
         changeTest(\TestObject.double, defaultValue: 0.0, changeValue: 100.0)
         changeTest(\TestObject.float, defaultValue: 0.0, changeValue: 100.0)
         changeTest(\TestObject.bool, defaultValue: false, changeValue: true)
-        changeTest(\TestObject.codable, defaultValue: CodableObject.defaultValue, changeValue: CodableObject(string: "change", int: 100))
+        changeTest(\TestObject.codable, defaultValue: .defaultValue, changeValue: CodableObject(string: "change", int: 100))
         changeTest(\TestObject.optional, defaultValue: nil, changeValue: "Change")
         changeTest(\TestObject.optionalDate, defaultValue: nil, changeValue: Date())
+        changeTest(\TestObject.array, defaultValue: [], changeValue: [
+            CodableObject(string: "change", int: 0),
+            CodableObject(string: "change", int: 1),
+            CodableObject(string: "change", int: 2)
+        ])
     }
 
     private func changeTest<Type: Equatable>(_ keyPath: WritableKeyPath<TestObject, Type>, defaultValue: Type, changeValue: Type) {

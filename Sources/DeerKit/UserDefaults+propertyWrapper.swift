@@ -59,34 +59,6 @@ extension Storage {
     }
 }
 
-// MARK: - Codable
-
-private struct CodableWrapper<T: UserDefaultsCompatible & Codable>: Codable {
-    let value: T
-}
-
-extension UserDefaultsCompatible where Self: Codable {
-
-    public func store(key: String, userDefaults: UserDefaults) {
-        let wrapper = CodableWrapper(value: self)
-        guard let data = try? JSONEncoder().encode(wrapper) else {
-            fatalError("Failed to encode to JSON.")
-        }
-        userDefaults.setValue(data, forKey: key)
-    }
-
-    public static func fetch(key: String, userDefaults: UserDefaults) -> Self? {
-        guard let data = userDefaults.data(forKey: key) else {
-            return nil
-        }
-        if let wrapper = try? JSONDecoder().decode(CodableWrapper<Self>.self, from: data) {
-            return wrapper.value
-        }
-        let object = try? JSONDecoder().decode(Self.self, from: data)
-        return object
-    }
-}
-
 // MARK: - Int
 
 extension Int: UserDefaultsCompatible {
@@ -182,3 +154,35 @@ extension Optional: UserDefaultsCompatible where Wrapped: UserDefaultsCompatible
         Wrapped.fetch(key: key, userDefaults: userDefaults)
     }
 }
+
+// MARK: - Codable
+
+private struct CodableWrapper<T: UserDefaultsCompatible & Codable>: Codable {
+    let value: T
+}
+
+extension UserDefaultsCompatible where Self: Codable {
+
+    public func store(key: String, userDefaults: UserDefaults) {
+        let wrapper = CodableWrapper(value: self)
+        guard let data = try? JSONEncoder().encode(wrapper) else {
+            fatalError("Failed to encode to JSON.")
+        }
+        userDefaults.setValue(data, forKey: key)
+    }
+
+    public static func fetch(key: String, userDefaults: UserDefaults) -> Self? {
+        guard let data = userDefaults.data(forKey: key) else {
+            return nil
+        }
+        if let wrapper = try? JSONDecoder().decode(CodableWrapper<Self>.self, from: data) {
+            return wrapper.value
+        }
+        let object = try? JSONDecoder().decode(Self.self, from: data)
+        return object
+    }
+}
+
+// MARK: - Array
+
+extension Array: UserDefaultsCompatible where Element: UserDefaultsCompatible & Codable {}
