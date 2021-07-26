@@ -1,6 +1,6 @@
 //
 //  UserDefaults+propertyWrapper.swift
-//  DeerKit
+//  DeerUserDefaults
 //
 //  Created by 松本淳之介 on 2020/10/10.
 //

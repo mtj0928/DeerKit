@@ -1,7 +1,7 @@
 import XCTest
 
-import DeerKitTests
+import DeerUserDefaultsTests
 
 var tests = [XCTestCaseEntry]()
-tests += DeerKitTests.allTests()
+tests += DeerUserDefaultsTests.allTests()
 XCTMain(tests)
