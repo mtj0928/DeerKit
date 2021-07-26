@@ -6,11 +6,13 @@ import PackageDescription
 let package = Package(
     name: "DeerKit",
     products: [
-        .library(name: "DeerKit", targets: ["DeerKit"]),
+        .library(name: "DeerUserDefaults", targets: ["DeerUserDefaults"]),
+        .library(name: "DeerFoundation", targets: ["DeerFoundation"]),
     ],
     dependencies: [],
     targets: [
-        .target(name: "DeerKit", dependencies: []),
-        .testTarget(name: "DeerKitTests", dependencies: ["DeerKit"]),
+        .target(name: "DeerFoundation", dependencies: []),
+        .target(name: "DeerUserDefaults", dependencies: []),
+        .testTarget(name: "DeerUserDefaultsTests", dependencies: ["DeerUserDefaults"]),
     ]
 )

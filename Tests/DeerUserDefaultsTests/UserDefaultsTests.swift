@@ -1,7 +1,7 @@
 import XCTest
-@testable import DeerKit
+@testable import DeerUserDefaults
 
-private let userDefaults = UserDefaults(suiteName: "DeerKit.UserDefaultsTest")!
+private let userDefaults = UserDefaults(suiteName: "DeerUserDefaults.UserDefaultsTest")!
 
 struct CodableObject: UserDefaultsCompatible, Codable, Equatable {
     static let defaultValue = CodableObject(string: "default", int: 0)
