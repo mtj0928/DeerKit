@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 /// UserDefaultsCompatible is a protocol which can be stored
 public protocol UserDefaultsCompatible {
@@ -23,24 +24,27 @@ public protocol UserDefaultsCompatible {
     static func fetch(key: String, userDefaults: UserDefaults) -> Self?
 }
 
-/// Storage is a propertyWrapper that you can store object to UserDafaults and you can fetch an object from UserDefaults.
+/// A propertyWrapper that you can store object to UserDafaults and you can fetch an object from UserDefaults.
 @propertyWrapper
-public struct Storage<ValueType: UserDefaultsCompatible> {
+public class Storage<ValueType: UserDefaultsCompatible>: NSObject {
+
     public var wrappedValue: ValueType {
-        get {
-            ValueType.fetch(key: key, userDefaults: userDefaults) ?? defaultValue
-        }
-        set {
-            newValue.store(key: key, userDefaults: userDefaults)
-        }
+        get { ValueType.fetch(key: key, userDefaults: userDefaults) ?? defaultValue }
+        set { newValue.store(key: key, userDefaults: userDefaults) }
+    }
+
+    public var projectedValue: Storage<ValueType> {
+        self
     }
 
     private let defaultValue: ValueType
 
-    let userDefaults: UserDefaults
-    let key: String
+    public let key: String
+    public let userDefaults: UserDefaults
+    public var pubisher: AnyPublisher<ValueType?, Never>
+    private let subject: CurrentValueSubject<ValueType?, Never>
 
-    /// Constructor
+    /// Creates a Storage object
     /// - Parameters:
     ///   - key: key for UserDefaults
     ///   - defaultValue: the value is returned when UserDefaults has no object for the given key
@@ -49,12 +53,30 @@ public struct Storage<ValueType: UserDefaultsCompatible> {
         self.key = key
         self.defaultValue = defaultValue
         self.userDefaults = userDefaults
+        self.subject = .init(ValueType.fetch(key: key, userDefaults: userDefaults) ?? defaultValue )
+        self.pubisher = subject.eraseToAnyPublisher()
+
+        super.init()
+
+        userDefaults.addObserver(self, forKeyPath: key, options: .new, context: nil)
+    }
+
+    deinit {
+        userDefaults.removeObserver(self, forKeyPath: key)
+    }
+
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard keyPath == key else {
+            return
+        }
+
+        subject.send(ValueType.fetch(key: key, userDefaults: userDefaults))
     }
 }
 
 extension Storage {
 
-    public init<Type>(key: String, userDefaults: UserDefaults = UserDefaults.standard) where ValueType == Optional<Type> {
+    public convenience init<Type>(key: String, userDefaults: UserDefaults = UserDefaults.standard) where ValueType == Optional<Type> {
         self.init(key: key, defaultValue: nil, userDefaults: userDefaults)
     }
 }
