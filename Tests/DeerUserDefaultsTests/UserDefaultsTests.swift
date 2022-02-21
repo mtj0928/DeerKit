@@ -62,6 +62,28 @@ final class UserDefaultsTest: XCTestCase {
         object[keyPath: keyPath] = changeValue
         XCTAssertEqual(object[keyPath: keyPath], changeValue)
     }
+
+    func testPublisher() {
+        let object = TestObject()
+        let intResult = expectValues(of: object.$int.pubisher, equals: [0, 1, 2, 100])
+        object.int = 1
+        object.int = 2
+        userDefaults.set(100, forKey: "int")
+
+        wait(for: [intResult.expectation], timeout: 1)
+
+        let codableResult = expectValues(
+            of: object.$codable.pubisher,
+            equals: [
+                .init(string: "default", int: 0),
+                .init(string: "aaa", int: 0),
+                .init(string: "bbb", int: 1)
+            ]
+        )
+        object.codable = .init(string: "aaa", int: 0)
+        object.codable = .init(string: "bbb", int: 1)
+        wait(for: [codableResult.expectation], timeout: 1)
+    }
 }
 
 extension Date: UserDefaultsCompatible {}
