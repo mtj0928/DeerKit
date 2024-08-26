@@ -1,15 +1,8 @@
-//
-//  UserDefaults+propertyWrapper.swift
-//  DeerUserDefaults
-//
-//  Created by 松本淳之介 on 2020/10/10.
-//
-
 import Foundation
-import Combine
+@preconcurrency import Combine
 
 /// UserDefaultsCompatible is a protocol which can be stored
-public protocol UserDefaultsCompatible {
+public protocol UserDefaultsCompatible: Sendable {
 
     /// Stores the object with the given key in give UserDefaults
     /// - Parameters:
@@ -24,9 +17,9 @@ public protocol UserDefaultsCompatible {
     static func fetch(key: String, userDefaults: UserDefaults) -> Self?
 }
 
-/// A propertyWrapper that you can store object to UserDafaults and you can fetch an object from UserDefaults.
+/// Storage is a propertyWrapper that you can store object to UserDefaults and you can fetch an object from UserDefaults.
 @propertyWrapper
-public class Storage<ValueType: UserDefaultsCompatible>: NSObject {
+public final class Storage<ValueType: UserDefaultsCompatible>: NSObject, Sendable {
 
     public var wrappedValue: ValueType {
         get { ValueType.fetch(key: key, userDefaults: userDefaults) ?? defaultValue }
@@ -38,10 +31,9 @@ public class Storage<ValueType: UserDefaultsCompatible>: NSObject {
     }
 
     private let defaultValue: ValueType
-
     public let key: String
     public let userDefaults: UserDefaults
-    public var pubisher: AnyPublisher<ValueType?, Never>
+    public let publisher: AnyPublisher<ValueType?, Never>
     private let subject: CurrentValueSubject<ValueType?, Never>
 
     /// Creates a Storage object
@@ -54,10 +46,9 @@ public class Storage<ValueType: UserDefaultsCompatible>: NSObject {
         self.defaultValue = defaultValue
         self.userDefaults = userDefaults
         self.subject = .init(ValueType.fetch(key: key, userDefaults: userDefaults) ?? defaultValue )
-        self.pubisher = subject.eraseToAnyPublisher()
+        self.publisher = subject.eraseToAnyPublisher()
 
         super.init()
-
         userDefaults.addObserver(self, forKeyPath: key, options: .new, context: nil)
     }
 
@@ -75,7 +66,6 @@ public class Storage<ValueType: UserDefaultsCompatible>: NSObject {
 }
 
 extension Storage {
-
     public convenience init<Type>(key: String, userDefaults: UserDefaults = UserDefaults.standard) where ValueType == Optional<Type> {
         self.init(key: key, defaultValue: nil, userDefaults: userDefaults)
     }
@@ -208,3 +198,5 @@ extension UserDefaultsCompatible where Self: Codable {
 // MARK: - Array
 
 extension Array: UserDefaultsCompatible where Element: UserDefaultsCompatible & Codable {}
+
+extension UserDefaults: @unchecked Swift.Sendable {}

@@ -1,10 +1,3 @@
-//
-//  URL+extension.swift
-//  DeerKit
-//
-//  Created by Junnosuke Matsumoto on 2021/02/11.
-//
-
 import Foundation
 
 extension URL {
