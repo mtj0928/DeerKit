@@ -1,15 +1,15 @@
 name: Test
 
-on: [push, pull_request ]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: fwal/setup-swift@v1
+    - uses: fwal/setup-swift@v2
       with:
-            swift-version: "5.5.2"
+            swift-version: "5.10"
     - name: Build
       run: swift build -v
     - name: Run tests

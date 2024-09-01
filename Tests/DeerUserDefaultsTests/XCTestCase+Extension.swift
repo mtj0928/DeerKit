@@ -1,10 +1,3 @@
-//
-//  XCTestCase+Extension.swift
-//  
-//
-//  Created by Junnosuke Matsumoto on 2022/02/21.
-//
-
 import XCTest
 import Combine
 

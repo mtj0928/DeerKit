@@ -29,10 +29,6 @@ private final class TestObject {
 
 final class UserDefaultsTest: XCTestCase {
 
-    static var allTests = [
-        ("testDefaultValueAndWrite", testDefaultValueAndWrite),
-    ]
-
     override func setUpWithError() throws {
         TestObject.Key.allCases.forEach { key in
             userDefaults.removeObject(forKey: key.rawValue)
@@ -65,7 +61,7 @@ final class UserDefaultsTest: XCTestCase {
 
     func testPublisher() {
         let object = TestObject()
-        let intResult = expectValues(of: object.$int.pubisher, equals: [0, 1, 2, 100])
+        let intResult = expectValues(of: object.$int.publisher, equals: [0, 1, 2, 100])
         object.int = 1
         object.int = 2
         userDefaults.set(100, forKey: "int")
@@ -73,7 +69,7 @@ final class UserDefaultsTest: XCTestCase {
         wait(for: [intResult.expectation], timeout: 1)
 
         let codableResult = expectValues(
-            of: object.$codable.pubisher,
+            of: object.$codable.publisher,
             equals: [
                 .init(string: "default", int: 0),
                 .init(string: "aaa", int: 0),
