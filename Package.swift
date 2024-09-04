@@ -11,15 +11,18 @@ let package = Package(
     products: [
         .library(name: "DeerKit", targets: [
             "DeerSwift",
+            "DeerSwiftUI",
             "DeerUserDefaults",
             "DeerFoundation"
         ]),
         .library(name: "DeerSwift", targets: ["DeerSwift"]),
+        .library(name: "DeerSwiftUI", targets: ["DeerSwiftUI"]),
         .library(name: "DeerUserDefaults", targets: ["DeerUserDefaults"]),
         .library(name: "DeerFoundation", targets: ["DeerFoundation"]),
     ],
     targets: [
         .target(name: "DeerSwift", swiftSettings: swiftSettings),
+        .target(name: "DeerSwiftUI", swiftSettings: swiftSettings),
         .target(name: "DeerFoundation", swiftSettings: swiftSettings),
         .target(name: "DeerUserDefaults", swiftSettings: swiftSettings),
 
